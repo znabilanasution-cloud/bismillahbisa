@@ -1,98 +1,194 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function App() {
+  const [screen, setScreen] = useState("login");
 
-export default function HomeScreen() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  const validateEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    return /^[0-9]{10,}$/.test(phone);
+  };
+
+  const handleRegister = () => {
+    if (!name || !email || !phone || !password || !confirm) {
+      Alert.alert("Error", "Semua field wajib diisi!");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      Alert.alert("Error", "Email tidak valid!");
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      Alert.alert("Error", "Phone harus angka & min 10 digit!");
+      return;
+    }
+
+    if (password !== confirm) {
+      Alert.alert("Error", "Password tidak sama!");
+      return;
+    }
+
+    Alert.alert("Success", "Register berhasil!");
+    setScreen("home");
+  };
+
+  const handleLogin = () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Isi email & password!");
+      return;
+    }
+
+    setScreen("home");
+  };
+
+  const handleReset = () => {
+    setScreen("login");
+    setName("");
+    setEmail("");
+    setPhone("");
+    setPassword("");
+    setConfirm("");
+  };
+
+  /* ================= LOGIN ================= */
+  if (screen === "login") {
+    return (
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <Text style={styles.title}>Login</Text>
+
+          <TextInput
+            placeholder="Email"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <TextInput
+            placeholder="Password"
+            style={styles.input}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setScreen("register")}>
+            <Text style={styles.link}>Daftar Disini</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  /* ================= REGISTER ================= */
+  if (screen === "register") {
+    return (
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <Text style={styles.title}>Register</Text>
+
+          <TextInput placeholder="Nama" style={styles.input} value={name} onChangeText={setName} />
+          <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} />
+          <TextInput placeholder="Phone" style={styles.input} value={phone} onChangeText={setPhone} keyboardType="numeric" />
+          <TextInput placeholder="Password" style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
+          <TextInput placeholder="Confirm Password" style={styles.input} secureTextEntry value={confirm} onChangeText={setConfirm} />
+
+          <TouchableOpacity style={styles.button} onPress={handleRegister}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setScreen("login")}>
+            <Text style={styles.link}>Kembali ke Login</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  /* ================= HOME ================= */
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome, {name || "User"} 🎉</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <TouchableOpacity style={styles.button} onPress={handleReset}>
+        <Text style={styles.buttonText}>Logout</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
+/* ================= STYLE ================= */
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#2b2b4d",
+    justifyContent: "center",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scroll: {
+    padding: 20,
+    justifyContent: "center",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  title: {
+    fontSize: 28,
+    color: "#e8ff3c",
+    textAlign: "center",
+    marginBottom: 20,
+    fontWeight: "bold",
+  },
+  input: {
+    backgroundColor: "#b4b4d5",
+    color: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#7f7f8b",
+  },
+  button: {
+    backgroundColor: "#e8ff3c",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+  link: {
+    color: "#3cffa0",
+    textAlign: "center",
+    marginTop: 15,
   },
 });
